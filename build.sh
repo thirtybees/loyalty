@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 CWD_BASENAME=${PWD##*/}
 
+composer install --no-dev
+composer -o dump-autoload
+
 FILES+=("logo.gif")
 FILES+=("logo.png")
 FILES+=("${CWD_BASENAME}.php")
+FILES+=("LoyaltyModule.php")
+FILES+=("LoyaltyStateModule.php")
 FILES+=("classes/**")
 FILES+=("controllers/**")
 FILES+=("images/**")
 FILES+=("js/**")
 FILES+=("translations/**")
+FILES+=("vendor/**")
 FILES+=("views/**")
 
 MODULE_VERSION="$(sed -ne "s/\\\$this->version *= *['\"]\([^'\"]*\)['\"] *;.*/\1/p" ${CWD_BASENAME}.php)"

@@ -1,0 +1,15 @@
+{
+    "name": "thirtybees/loyalty",
+    "description": "Loyalty program module for thirty bees",
+    "type": "library",
+    "license": "AFLv3",
+    "authors": [
+        {
+            "name": "Michael Dekker",
+            "email": "git@michaeldekker.nl"
+        }
+    ],
+    "autoload": {
+        "classmap": ["classes/"]
+    }
+}
