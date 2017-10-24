@@ -30,7 +30,7 @@ if (!defined('_TB_VERSION_')) {
     exit;
 }
 
-require_once __DIR__.'/classes/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 /**
  * Class Loyalty
@@ -582,6 +582,10 @@ class Loyalty extends Module
                     'none_award'     => Configuration::get('PS_LOYALTY_NONE_AWARD'),
                 ]
             );
+            Media::addJsDef([
+                'loyalty_already' => $this->l('No reward points for this product because there\'s already a discount.'),
+                'loyalty_nopoints'  => $this->l('No reward points for this product.'),
+            ]);
 
             $this->context->controller->addJS(($this->_path).'js/loyalty.js');
 
