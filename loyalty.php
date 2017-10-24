@@ -589,8 +589,8 @@ class Loyalty extends Module
                 ]
             );
             Media::addJsDef([
-                'loyalty_already' => $this->l('No reward points for this product because there\'s already a discount.'),
-                'loyalty_nopoints'  => $this->l('No reward points for this product.'),
+                'loyalty_already'   => htmlspecialchars($this->l('No reward points for this product because there\'s already a discount.'), ENT_QUOTES, 'UTF-8'),
+                'loyalty_nopoints'  => htmlspecialchars($this->l('No reward points for this product.'), ENT_QUOTES, 'UTF-8'),
             ]);
 
             $this->context->controller->addJS(($this->_path).'js/loyalty.js');
