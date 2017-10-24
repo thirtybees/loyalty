@@ -52,7 +52,7 @@ class Loyalty extends Module
     {
         $this->name = 'loyalty';
         $this->tab = 'pricing_promotion';
-        $this->version = '2.0.1';
+        $this->version = '2.0.2';
         $this->author = 'thirty bees';
         $this->need_instance = 0;
 
@@ -624,7 +624,7 @@ class Loyalty extends Module
         $details = OrderReturn::getOrdersReturnDetail((int) $params['orderReturn']->id);
         foreach ($details as $detail) {
             if ($taxesEnabled == PS_TAX_EXC) {
-                $totalPrice += Db::getInstance()->getValue(
+                $totalPrice += Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                     '
                 SELECT ROUND(total_price_tax_excl, 2)
                 FROM '._DB_PREFIX_.'order_detail od
