@@ -631,7 +631,7 @@ class Loyalty extends Module
                 WHERE id_order_detail = '.(int) $detail['id_order_detail']
                 );
             } else {
-                $totalPrice += Db::getInstance()->getValue(
+                $totalPrice += Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
                     '
                 SELECT ROUND(total_price_tax_incl, 2)
                 FROM '._DB_PREFIX_.'order_detail od
