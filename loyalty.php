@@ -696,10 +696,15 @@ class Loyalty extends Module
             $loyalty['url'] = 'index.php?tab=AdminOrders&id_order='.$loyalty['id'].'&vieworder&token='.Tools::getAdminToken('AdminOrders'.(int) Tab::getIdFromClassName('AdminOrders').(int) $params['cookie']->id_employee);
         }
 
+        Media::addJsDef([
+            'loyalty_endpoint' => $this->context->link->getAdminLink('AdminModules', true)."&configure={$this->name}&ajax=1",
+        ]);
+
         $this->context->smarty->assign([
-            'details'       => $details,
-            'points'        => $points,
-            'voucher_value' => LoyaltyModule::getVoucherValue((int) $points, (int) Configuration::get('PS_CURRENCY_DEFAULT')),
+            'details'          => $details,
+            'points'           => $points,
+            'voucher_value'    => LoyaltyModule::getVoucherValue((int) $points, (int) Configuration::get('PS_CURRENCY_DEFAULT')),
+            'available_states' => LoyaltyStateModule::getStates(),
         ]);
 
         return $this->display(__FILE__, 'views/templates/admin/admincustomers.tpl');
@@ -752,6 +757,26 @@ class Loyalty extends Module
     }
 
     /**
+     * Change state via ajax
+     */
+    public function ajaxProcessChangeState()
+    {
+        $idOrder = Tools::getValue('idLoyalty');
+        $idLoyaltyState = Tools::getValue('idLoyaltyState');
+        $loyalty = new LoyaltyModule(LoyaltyModule::getByOrderId($idOrder));
+        if (!Validate::isLoadedObject($loyalty)) {
+            die(json_encode([
+                'success' => false,
+            ]));
+        }
+        $loyalty->id_loyalty_state = $idLoyaltyState;
+
+        die(json_encode([
+            'success' => $loyalty->save(),
+        ]));
+    }
+
+    /**
      * @return void
      */
     protected function instanceDefaultStates()
@@ -773,11 +798,10 @@ class Loyalty extends Module
             $idLangDefault = (int) Configuration::get('PS_LANG_DEFAULT');
             $languages = Language::getLanguages();
 
-            $this->_errors = [];
             if (!is_array(Tools::getValue('categoryBox')) || !count(Tools::getValue('categoryBox'))) {
-                $this->_errors[] = $this->l('You must choose at least one category for voucher\'s action');
+                $this->context->controller->errors[] = $this->l('You must choose at least one category for voucher\'s action');
             }
-            if (!count($this->_errors)) {
+            if (!count($this->context->controller->errors)) {
                 Configuration::updateValue('PS_LOYALTY_VOUCHER_CATEGORY', $this->voucherCategories(Tools::getValue('categoryBox')));
                 Configuration::updateValue('PS_LOYALTY_POINT_VALUE', (float) (Tools::getValue('point_value')));
                 Configuration::updateValue('PS_LOYALTY_POINT_RATE', (float) (Tools::getValue('point_rate')));
@@ -828,13 +852,7 @@ class Loyalty extends Module
                 }
                 $this->loyaltyStateNoneAward->save();
 
-                $this->html .= $this->displayConfirmation($this->l('Settings updated.'));
-            } else {
-                $errors = '';
-                foreach ($this->_errors as $error) {
-                    $errors .= $error.'<br />';
-                }
-                $this->html .= $this->displayError($errors);
+                $this->context->controller->confirmations[] = $this->l('Settings updated.');
             }
         }
     }

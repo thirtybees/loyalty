@@ -354,5 +354,4 @@ class LoyaltyModule extends \ObjectModel
 
         return false;
     }
-
 }

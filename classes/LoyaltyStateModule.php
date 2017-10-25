@@ -25,9 +25,14 @@
 
 namespace LoyaltyModule;
 
+use Loyalty;
+use Module;
+
 if (!defined('_TB_VERSION_')) {
     exit;
 }
+
+require_once __DIR__.'/../loyalty.php';
 
 /**
  * Class LoyaltyStateModule
@@ -124,5 +129,25 @@ class LoyaltyStateModule extends \ObjectModel
     public static function getNoneAwardId()
     {
         return 5;
+    }
+
+    /**
+     * Get the states that can be linked to an order + translations
+     *
+     * @return array
+     *
+     * @since 3.0.0
+     */
+    public static function getStates()
+    {
+        /** @var Loyalty $module */
+        $module = Module::getInstanceByName('loyalty');
+
+        return [
+            static::getDefaultId()    => $module->getL('Awaiting validation'),
+            static::getValidationId() => $module->getL('Available'),
+            static::getCancelId()     => $module->getL('Cancelled'),
+            static::getConvertId()    => $module->getL('Already converted'),
+        ];
     }
 }
