@@ -108,14 +108,15 @@
       </ul>
     {/if}
     {if $orders|@count > 10}
-      <form action="{$pagination_link}" method="get" class="pagination">
+      <form action="{$pagination_link|escape:'htmlall':'UTF-8'}" method="get" class="pagination">
         <p>
           <input type="submit" class="btn btn-xs btn-default" value="{l s='OK'  mod='loyalty'}"/>
           <label for="nb_item">{l s='items:' mod='loyalty'}</label>
           <select name="n" id="nb_item">
             {foreach from=$nArray item=nValue}
               {if $nValue <= $orders|@count}
-                <option value="{$nValue|escape:'html':'UTF-8'}" {if $nbpagination == $nValue}selected="selected"{/if}>{$nValue|escape:'html':'UTF-8'}</option>
+                <option value="{$nValue|escape:'html':'UTF-8'}"
+                        {if $nbpagination == $nValue}selected="selected"{/if}>{$nValue|escape:'html':'UTF-8'}</option>
               {/if}
             {/foreach}
           </select>
@@ -188,7 +189,6 @@
     </div>
     {if $minimalLoyalty > 0}
       <p>{l s='The minimum order amount in order to use these vouchers is:' mod='loyalty'} {convertPrice price=$minimalLoyalty}</p>{/if}
-
   {else}
     <div class="alert alert-warning">{l s='No vouchers yet.' mod='loyalty'}</div>
   {/if}

@@ -262,7 +262,7 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
                 }
             }
             if (!empty($categoriesNames)) {
-                $categoriesNames = Tools::truncate(implode(', ', $categoriesNames), 100).'.';
+                $categoriesNames = Tools::truncate(implode(', ', $categoriesNames), 10000).'.';
             } else {
                 $categoriesNames = null;
             }
