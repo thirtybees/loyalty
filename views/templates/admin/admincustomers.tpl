@@ -1,44 +1,46 @@
 <div class="col-lg-12">
   <div class="panel">
-    <div class="panel-heading">{l s='Loyalty points (%d points)' sprintf=[$points] mod='loyalty'}</div>
+    <div class="panel-heading">{l s='Loyalty points' mod='loyalty'} <span class="badge">{$points|intval}</span></div>
     <div class="panel-body">
       {if (!isset($points) || count($details) == 0)}
         {l s='This customer has no points' mod='loyalty'}
-      {/if}
-
-      <table id="loyalty-table" cellspacing="0" cellpadding="0" class="table">
-        <thead>
-          <tr style="background-color:#F5E9CF; padding: 0.3em 0.1em;">
-            <th>{l s='Order' mod='loyalty'}</th>
-            <th>{l s='Date' mod='loyalty'}</th>
-            <th>{l s='Total (without shipping)' mod='loyalty'}</th>
-            <th>{l s='Points' mod='loyalty'}</th>
-            <th>{l s='Points Status' mod='loyalty'}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tfoot>
-          <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td colspan="2" class="bold" style="text-align: right;">{l s='Total points available:' mod='loyalty'}</td>
-            <td>{$points|escape:'htmlall':'UTF-8'}</td>
-            <td>{l s='Voucher value:' mod='loyalty'} {displayPrice price=$voucher_value}</td>
-          </tr>
-        </tfoot>
-        <tbody>
-          {foreach $details as $key => $loyalty}
-            <tr style="background-color: {if $key % 2 != 0}#FFF6CF{else}#FFFFFF{/if}" data-id-loyalty="{$loyalty['id']|intval}" data-id-loyalty-state="{$loyalty['id_loyalty_state']|intval}">
-              <td>{if $loyalty['id'] > 0}<a style="color: #268CCD; font-weight: bold; text-decoration: underline;" href="{$loyalty['url']|escape:'htmlall':'UTF-8'}">{l s='#%d' sprintf=[$loyalty['id']]}</a>{else}--{/if}</td>
-              <td>{$loyalty['date']|date_format:'d-m-Y H:i'}</td>
-              <td>{if $loyalty['id'] > 0}{$loyalty['total_without_shipping']}{else}--{/if}</td>
-              <td>{$loyalty['points']|intval}</td>
-              <td id="voucher_state_{$loyalty['id']|intval}">{$loyalty['state']|escape:'htmlall':'UTF-8'}</td>
-              <td></td>
+      {else}
+        <div class="panel">
+              <span><i class="icon icon-ok-circle"></i> {l s='Total points available:' mod='loyalty'}&nbsp;
+                {if !$points}
+                  <span class="label label-danger">{$points|intval}</span>
+                {else}
+                  <span class="label label-success">{$points|intval}</span>
+                {/if}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span><i class="icon icon-money"></i> {l s='Voucher value:' mod='loyalty'} {displayPrice price=$voucher_value}</span>
+              </span>
+        </div>
+        <table id="loyalty-table" cellspacing="0" cellpadding="0" class="table">
+          <thead>
+            <tr style="padding: 0.3em 0.1em;">
+              <th>{l s='Order' mod='loyalty'}</th>
+              <th>{l s='Date' mod='loyalty'}</th>
+              <th>{l s='Total (without shipping)' mod='loyalty'}</th>
+              <th>{l s='Points' mod='loyalty'}</th>
+              <th>{l s='Points Status' mod='loyalty'}</th>
+              <th></th>
             </tr>
-          {/foreach}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {foreach $details as $key => $loyalty}
+              <tr data-id-loyalty="{$loyalty['id']|intval}" data-id-loyalty-state="{$loyalty['id_loyalty_state']|intval}" class="{if $key % 2 != 0}odd{/if}">
+                <td>{if $loyalty['id'] > 0}<a style="color: #268CCD; font-weight: bold; text-decoration: underline;" href="{$loyalty['url']|escape:'htmlall':'UTF-8'}">{l s='#%d' sprintf=[$loyalty['id']]}</a>{else}--{/if}</td>
+                <td>{$loyalty['date']|date_format:'d-m-Y H:i'}</td>
+                <td>{if $loyalty['id'] > 0}{$loyalty['total_without_shipping']}{else}--{/if}</td>
+                <td>{$loyalty['points']|intval}</td>
+                <td id="voucher_state_{$loyalty['id']|intval}">{$loyalty['state']|escape:'htmlall':'UTF-8'}</td>
+                <td></td>
+              </tr>
+            {/foreach}
+          </tbody>
+        </table>
+      {/if}
     </div>
   </div>
 </div>
