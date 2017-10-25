@@ -24,8 +24,6 @@
 
 <!-- MODULE Loyalty -->
 <li class="loyalty">
-	<a href="{$link->getModuleLink('loyalty', 'default', ['process' => 'summary'], true)|escape:'html'}" title="{l s='My loyalty points' mod='loyalty'}" rel="nofollow">
-		<img src="{$module_template_dir}images/loyalty.gif" alt="{l s='My loyalty points' mod='loyalty'}" class="icon" /> {l s='My loyalty points' mod='loyalty'}
-	</a>
+	<a href="{$link->getModuleLink('loyalty', 'default', ['process' => 'summary'], true)|escape:'html':'UTF-8'}" title="{l s='My loyalty points' mod='loyalty'}" rel="nofollow"><i class="icon icon-flag"></i> <span>{l s='My loyalty points' mod='loyalty'}</span></a>
 </li>
 <!-- END : MODULE Loyalty -->

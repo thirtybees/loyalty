@@ -39,10 +39,15 @@ class Loyalty extends Module
 {
     protected $html = '';
 
+    /** @var LoyaltyStateModule $loyaltyStateDefault */
     public $loyaltyStateDefault;
+    /** @var LoyaltyStateModule $loyaltyStateValidation */
     public $loyaltyStateValidation;
+    /** @var LoyaltyStateModule $loyaltyStateCancel */
     public $loyaltyStateCancel;
+    /** @var LoyaltyStateModule $loyaltyStateConvert */
     public $loyaltyStateConvert;
+    /** @var LoyaltyStateModule $loyaltyStateNoneAward */
     public $loyaltyStateNoneAward;
 
     /**
@@ -73,17 +78,30 @@ class Loyalty extends Module
      */
     public function install()
     {
-        if (!parent::install() || !$this->installDB() || !$this->registerHook('extraRight') || !$this->registerHook('updateOrderStatus')
-            || !$this->registerHook('newOrder') || !$this->registerHook('adminCustomers') || !$this->registerHook('shoppingCart')
-            || !$this->registerHook('orderReturn') || !$this->registerHook('cancelProduct') || !$this->registerHook('customerAccount')
-            || !Configuration::updateValue('PS_LOYALTY_POINT_VALUE', '0.20') || !Configuration::updateValue('PS_LOYALTY_MINIMAL', 0)
-            || !Configuration::updateValue('PS_LOYALTY_POINT_RATE', '10') || !Configuration::updateValue('PS_LOYALTY_NONE_AWARD', '1')
-            || !Configuration::updateValue('PS_LOYALTY_TAX', '0') || !Configuration::updateValue('PS_LOYALTY_VALIDITY_PERIOD', '0')
+        if (!parent::install()
+            || !$this->installDB()
+            || !$this->registerHook('extraRight')
+            || !$this->registerHook('updateOrderStatus')
+            || !$this->registerHook('newOrder')
+            || !$this->registerHook('adminCustomers')
+            || !$this->registerHook('shoppingCart')
+            || !$this->registerHook('orderReturn')
+            || !$this->registerHook('cancelProduct')
+            || !$this->registerHook('customerAccount')
+            || !Configuration::updateValue('PS_LOYALTY_POINT_VALUE', '0.20')
+            || !Configuration::updateValue('PS_LOYALTY_MINIMAL', 0)
+            || !Configuration::updateValue('PS_LOYALTY_POINT_RATE', '10')
+            || !Configuration::updateValue('PS_LOYALTY_NONE_AWARD', '1')
+            || !Configuration::updateValue('PS_LOYALTY_TAX', '0')
+            || !Configuration::updateValue('PS_LOYALTY_VALIDITY_PERIOD', '0')
         ) {
             return false;
         }
 
-        $defaultTranslations = ['en' => 'Loyalty reward', 'fr' => 'Récompense fidélité'];
+        $defaultTranslations = [
+            'en' => 'Loyalty reward',
+            'fr' => 'Récompense fidélité',
+        ];
         $conf = [(int) Configuration::get('PS_LANG_DEFAULT') => $this->l('Loyalty reward')];
         foreach (Language::getLanguages() as $language) {
             if (isset($defaultTranslations[$language['iso_code']])) {
@@ -210,109 +228,18 @@ class Loyalty extends Module
     public function getContent()
     {
         $this->instanceDefaultStates();
-        $this->_postProcess();
+        $this->postProcess();
 
         $this->html .= $this->renderForm();
 
         return $this->html;
     }
 
-    private function instanceDefaultStates()
-    {
-        /* Recover default loyalty status save at module installation */
-        $this->loyaltyStateDefault = new LoyaltyStateModule(LoyaltyStateModule::getDefaultId());
-        $this->loyaltyStateValidation = new LoyaltyStateModule(LoyaltyStateModule::getValidationId());
-        $this->loyaltyStateCancel = new LoyaltyStateModule(LoyaltyStateModule::getCancelId());
-        $this->loyaltyStateConvert = new LoyaltyStateModule(LoyaltyStateModule::getConvertId());
-        $this->loyaltyStateNoneAward = new LoyaltyStateModule(LoyaltyStateModule::getNoneAwardId());
-    }
-
-    private function _postProcess()
-    {
-        if (Tools::isSubmit('submitLoyalty')) {
-            $idLangDefault = (int) Configuration::get('PS_LANG_DEFAULT');
-            $languages = Language::getLanguages();
-
-            $this->_errors = [];
-            if (!is_array(Tools::getValue('categoryBox')) || !count(Tools::getValue('categoryBox'))) {
-                $this->_errors[] = $this->l('You must choose at least one category for voucher\'s action');
-            }
-            if (!count($this->_errors)) {
-                Configuration::updateValue('PS_LOYALTY_VOUCHER_CATEGORY', $this->voucherCategories(Tools::getValue('categoryBox')));
-                Configuration::updateValue('PS_LOYALTY_POINT_VALUE', (float) (Tools::getValue('point_value')));
-                Configuration::updateValue('PS_LOYALTY_POINT_RATE', (float) (Tools::getValue('point_rate')));
-                Configuration::updateValue('PS_LOYALTY_NONE_AWARD', (int) (Tools::getValue('PS_LOYALTY_NONE_AWARD')));
-                Configuration::updateValue('PS_LOYALTY_MINIMAL', (float) (Tools::getValue('minimal')));
-                Configuration::updateValue('PS_LOYALTY_TAX', (int) (Tools::getValue('PS_LOYALTY_TAX')));
-                Configuration::updateValue('PS_LOYALTY_VALIDITY_PERIOD', (int) (Tools::getValue('validity_period')));
-
-                $this->loyaltyStateValidation->id_order_state = (int) (Tools::getValue('id_order_state_validation'));
-                $this->loyaltyStateCancel->id_order_state = (int) (Tools::getValue('id_order_state_cancel'));
-
-                $arrayVoucherDetails = [];
-                foreach ($languages as $language) {
-                    $arrayVoucherDetails[(int) ($language['id_lang'])] = Tools::getValue('voucher_details_'.(int) ($language['id_lang']));
-                    $this->loyaltyStateDefault->name[(int) ($language['id_lang'])] = Tools::getValue('default_loyalty_state_'.(int) ($language['id_lang']));
-                    $this->loyaltyStateValidation->name[(int) ($language['id_lang'])] = Tools::getValue('validation_loyalty_state_'.(int) ($language['id_lang']));
-                    $this->loyaltyStateCancel->name[(int) ($language['id_lang'])] = Tools::getValue('cancel_loyalty_state_'.(int) ($language['id_lang']));
-                    $this->loyaltyStateConvert->name[(int) ($language['id_lang'])] = Tools::getValue('convert_loyalty_state_'.(int) ($language['id_lang']));
-                    $this->loyaltyStateNoneAward->name[(int) ($language['id_lang'])] = Tools::getValue('none_award_loyalty_state_'.(int) ($language['id_lang']));
-                }
-                if (empty($arrayVoucherDetails[$idLangDefault])) {
-                    $arrayVoucherDetails[$idLangDefault] = ' ';
-                }
-                Configuration::updateValue('PS_LOYALTY_VOUCHER_DETAILS', $arrayVoucherDetails);
-
-                if (empty($this->loyaltyStateDefault->name[$idLangDefault])) {
-                    $this->loyaltyStateDefault->name[$idLangDefault] = ' ';
-                }
-                $this->loyaltyStateDefault->save();
-
-                if (empty($this->loyaltyStateValidation->name[$idLangDefault])) {
-                    $this->loyaltyStateValidation->name[$idLangDefault] = ' ';
-                }
-                $this->loyaltyStateValidation->save();
-
-                if (empty($this->loyaltyStateCancel->name[$idLangDefault])) {
-                    $this->loyaltyStateCancel->name[$idLangDefault] = ' ';
-                }
-                $this->loyaltyStateCancel->save();
-
-                if (empty($this->loyaltyStateConvert->name[$idLangDefault])) {
-                    $this->loyaltyStateConvert->name[$idLangDefault] = ' ';
-                }
-                $this->loyaltyStateConvert->save();
-
-                if (empty($this->loyaltyStateNoneAward->name[$idLangDefault])) {
-                    $this->loyaltyStateNoneAward->name[$idLangDefault] = ' ';
-                }
-                $this->loyaltyStateNoneAward->save();
-
-                $this->html .= $this->displayConfirmation($this->l('Settings updated.'));
-            } else {
-                $errors = '';
-                foreach ($this->_errors as $error) {
-                    $errors .= $error.'<br />';
-                }
-                $this->html .= $this->displayError($errors);
-            }
-        }
-    }
-
-    private function voucherCategories($categories)
-    {
-        $cat = '';
-        if ($categories && is_array($categories)) {
-            foreach ($categories as $category) {
-                $cat .= $category.',';
-            }
-        }
-
-        return rtrim($cat, ',');
-    }
-
-    /* Hook display on product detail */
-
+    /**
+     * Hook display on product detail
+     *
+     * @return string
+     */
     public function renderForm()
     {
         $orderStates = OrderState::getOrderStates($this->context->language->id);
@@ -524,8 +451,11 @@ class Loyalty extends Module
         return $helper->generateForm([$fieldsForm1, $fieldsForm2]);
     }
 
-    /* Hook display on customer account page */
-
+    /**
+     * Hook display on customer account page
+     *
+     * @return array
+     */
     public function getConfigFieldsValues()
     {
         $fieldsValues = [
@@ -553,6 +483,11 @@ class Loyalty extends Module
         return $fieldsValues;
     }
 
+    /**
+     * @param array $params
+     *
+     * @return bool|string
+     */
     public function hookExtraRight($params)
     {
         $product = new Product((int) Tools::getValue('id_product'));
@@ -577,6 +512,7 @@ class Loyalty extends Module
                 $pointsAfter = $points;
                 $pointsBefore = 0;
             }
+
             $this->smarty->assign(
                 [
                     'points'         => (int) $points,
@@ -588,35 +524,38 @@ class Loyalty extends Module
                     'none_award'     => Configuration::get('PS_LOYALTY_NONE_AWARD'),
                 ]
             );
-            Media::addJsDef([
-                'loyalty_already'   => htmlspecialchars($this->l('No reward points for this product because there\'s already a discount.'), ENT_QUOTES, 'UTF-8'),
-                'loyalty_nopoints'  => htmlspecialchars($this->l('No reward points for this product.'), ENT_QUOTES, 'UTF-8'),
-            ]);
 
-            $this->context->controller->addJS(($this->_path).'js/loyalty.js');
-
-            return $this->display(__FILE__, 'product.tpl');
+            return $this->display(__FILE__, 'product.tpl').$this->display(__FILE__, 'product.js.tpl');
         }
 
         return false;
     }
 
-    /* Catch product returns and substract loyalty points */
-
-    public function hookDisplayMyAccountBlock($params)
+    /**
+     * Catch product returns and substract loyalty points
+     *
+     * @return string
+     */
+    public function hookDisplayMyAccountBlock()
     {
-        return $this->hookCustomerAccount($params);
+        return $this->hookCustomerAccount();
     }
 
-    /* Hook display on shopping cart summary */
-
-    public function hookCustomerAccount($params)
+    /**
+     * Hook display on shopping cart summary
+     *
+     * @return string
+     */
+    public function hookCustomerAccount()
     {
         return $this->display(__FILE__, 'my-account.tpl');
     }
 
-    /* Hook called when a new order is created */
-
+    /**
+     * Hook called when a new order is created
+     *
+     * @param array $params
+     */
     public function hookOrderReturn($params)
     {
         $totalPrice = 0;
@@ -648,8 +587,13 @@ class Loyalty extends Module
         $loyaltyNew->save();
     }
 
-    /* Hook called when an order change its status */
-
+    /**
+     * Hook called when an order change its status
+     *
+     * @param array $params
+     *
+     * @return string
+     */
     public function hookShoppingCart($params)
     {
         if (Validate::isLoadedObject($params['cart'])) {
@@ -668,8 +612,13 @@ class Loyalty extends Module
         return $this->display(__FILE__, 'shopping-cart.tpl');
     }
 
-    /* Hook display in tab AdminCustomers on BO */
-
+    /**
+     * Hook display in tab AdminCustomers on BO
+     *
+     * @param array $params
+     *
+     * @return bool
+     */
     public function hookNewOrder($params)
     {
         if (!Validate::isLoadedObject($params['customer']) || !Validate::isLoadedObject($params['order'])) {
@@ -688,6 +637,11 @@ class Loyalty extends Module
         return $loyalty->save();
     }
 
+    /**
+     * @param array $params
+     *
+     * @return bool
+     */
     public function hookUpdateOrderStatus($params)
     {
         if (!Validate::isLoadedObject($params['newOrderStatus'])) {
@@ -724,6 +678,11 @@ class Loyalty extends Module
         return true;
     }
 
+    /**
+     * @param array $params
+     *
+     * @return string
+     */
     public function hookAdminCustomers($params)
     {
         $customer = new Customer((int) $params['id_customer']);
@@ -779,29 +738,38 @@ class Loyalty extends Module
         return $html;
     }
 
+    /**
+     * @param array $params
+     *
+     * @return void
+     */
     public function hookCancelProduct($params)
     {
-        if (!Validate::isLoadedObject($params['order']) || !Validate::isLoadedObject($order_detail = new OrderDetail((int) $params['id_order_detail']))
+        if (!Validate::isLoadedObject($params['order'])
+            || !Validate::isLoadedObject($orderDetail = new OrderDetail((int) $params['id_order_detail']))
             || !Validate::isLoadedObject($loyalty = new LoyaltyModule((int) LoyaltyModule::getByOrderId((int) $params['order']->id)))
         ) {
-            return false;
+            return;
         }
 
         $taxesEnabled = Product::getTaxCalculationMethod();
         $loyaltyNew = new LoyaltyModule();
         if ($taxesEnabled == PS_TAX_EXC) {
-            $loyaltyNew->points = -1 * LoyaltyModule::getNbPointsByPrice(number_format($order_detail->total_price_tax_excl, 2, '.', ''));
+            $loyaltyNew->points = -1 * LoyaltyModule::getNbPointsByPrice(number_format($orderDetail->total_price_tax_excl, 2, '.', ''));
         } else {
-            $loyaltyNew->points = -1 * LoyaltyModule::getNbPointsByPrice(number_format($order_detail->total_price_tax_incl, 2, '.', ''));
+            $loyaltyNew->points = -1 * LoyaltyModule::getNbPointsByPrice(number_format($orderDetail->total_price_tax_incl, 2, '.', ''));
         }
         $loyaltyNew->id_loyalty_state = (int) LoyaltyStateModule::getCancelId();
         $loyaltyNew->id_order = (int) $params['order']->id;
         $loyaltyNew->id_customer = (int) $loyalty->id_customer;
         $loyaltyNew->add();
-
-        return;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return string
+     */
     public function getL($key)
     {
         $translations = [
@@ -814,5 +782,110 @@ class Loyalty extends Module
         ];
 
         return (array_key_exists($key, $translations)) ? $translations[$key] : $key;
+    }
+
+    /**
+     * @return void
+     */
+    protected function instanceDefaultStates()
+    {
+        /* Recover default loyalty status save at module installation */
+        $this->loyaltyStateDefault = new LoyaltyStateModule(LoyaltyStateModule::getDefaultId());
+        $this->loyaltyStateValidation = new LoyaltyStateModule(LoyaltyStateModule::getValidationId());
+        $this->loyaltyStateCancel = new LoyaltyStateModule(LoyaltyStateModule::getCancelId());
+        $this->loyaltyStateConvert = new LoyaltyStateModule(LoyaltyStateModule::getConvertId());
+        $this->loyaltyStateNoneAward = new LoyaltyStateModule(LoyaltyStateModule::getNoneAwardId());
+    }
+
+    /**
+     * @return void
+     */
+    protected function postProcess()
+    {
+        if (Tools::isSubmit('submitLoyalty')) {
+            $idLangDefault = (int) Configuration::get('PS_LANG_DEFAULT');
+            $languages = Language::getLanguages();
+
+            $this->_errors = [];
+            if (!is_array(Tools::getValue('categoryBox')) || !count(Tools::getValue('categoryBox'))) {
+                $this->_errors[] = $this->l('You must choose at least one category for voucher\'s action');
+            }
+            if (!count($this->_errors)) {
+                Configuration::updateValue('PS_LOYALTY_VOUCHER_CATEGORY', $this->voucherCategories(Tools::getValue('categoryBox')));
+                Configuration::updateValue('PS_LOYALTY_POINT_VALUE', (float) (Tools::getValue('point_value')));
+                Configuration::updateValue('PS_LOYALTY_POINT_RATE', (float) (Tools::getValue('point_rate')));
+                Configuration::updateValue('PS_LOYALTY_NONE_AWARD', (int) (Tools::getValue('PS_LOYALTY_NONE_AWARD')));
+                Configuration::updateValue('PS_LOYALTY_MINIMAL', (float) (Tools::getValue('minimal')));
+                Configuration::updateValue('PS_LOYALTY_TAX', (int) (Tools::getValue('PS_LOYALTY_TAX')));
+                Configuration::updateValue('PS_LOYALTY_VALIDITY_PERIOD', (int) (Tools::getValue('validity_period')));
+
+                $this->loyaltyStateValidation->id_order_state = (int) (Tools::getValue('id_order_state_validation'));
+                $this->loyaltyStateCancel->id_order_state = (int) (Tools::getValue('id_order_state_cancel'));
+
+                $arrayVoucherDetails = [];
+                foreach ($languages as $language) {
+                    $arrayVoucherDetails[(int) ($language['id_lang'])] = Tools::getValue('voucher_details_'.(int) ($language['id_lang']));
+                    $this->loyaltyStateDefault->name[(int) ($language['id_lang'])] = Tools::getValue('default_loyalty_state_'.(int) ($language['id_lang']));
+                    $this->loyaltyStateValidation->name[(int) ($language['id_lang'])] = Tools::getValue('validation_loyalty_state_'.(int) ($language['id_lang']));
+                    $this->loyaltyStateCancel->name[(int) ($language['id_lang'])] = Tools::getValue('cancel_loyalty_state_'.(int) ($language['id_lang']));
+                    $this->loyaltyStateConvert->name[(int) ($language['id_lang'])] = Tools::getValue('convert_loyalty_state_'.(int) ($language['id_lang']));
+                    $this->loyaltyStateNoneAward->name[(int) ($language['id_lang'])] = Tools::getValue('none_award_loyalty_state_'.(int) ($language['id_lang']));
+                }
+                if (empty($arrayVoucherDetails[$idLangDefault])) {
+                    $arrayVoucherDetails[$idLangDefault] = ' ';
+                }
+                Configuration::updateValue('PS_LOYALTY_VOUCHER_DETAILS', $arrayVoucherDetails);
+
+                if (empty($this->loyaltyStateDefault->name[$idLangDefault])) {
+                    $this->loyaltyStateDefault->name[$idLangDefault] = ' ';
+                }
+                $this->loyaltyStateDefault->save();
+
+                if (empty($this->loyaltyStateValidation->name[$idLangDefault])) {
+                    $this->loyaltyStateValidation->name[$idLangDefault] = ' ';
+                }
+                $this->loyaltyStateValidation->save();
+
+                if (empty($this->loyaltyStateCancel->name[$idLangDefault])) {
+                    $this->loyaltyStateCancel->name[$idLangDefault] = ' ';
+                }
+                $this->loyaltyStateCancel->save();
+
+                if (empty($this->loyaltyStateConvert->name[$idLangDefault])) {
+                    $this->loyaltyStateConvert->name[$idLangDefault] = ' ';
+                }
+                $this->loyaltyStateConvert->save();
+
+                if (empty($this->loyaltyStateNoneAward->name[$idLangDefault])) {
+                    $this->loyaltyStateNoneAward->name[$idLangDefault] = ' ';
+                }
+                $this->loyaltyStateNoneAward->save();
+
+                $this->html .= $this->displayConfirmation($this->l('Settings updated.'));
+            } else {
+                $errors = '';
+                foreach ($this->_errors as $error) {
+                    $errors .= $error.'<br />';
+                }
+                $this->html .= $this->displayError($errors);
+            }
+        }
+    }
+
+    /**
+     * @param array $categories
+     *
+     * @return string
+     */
+    protected function voucherCategories($categories)
+    {
+        $cat = '';
+        if ($categories && is_array($categories)) {
+            foreach ($categories as $category) {
+                $cat .= $category.',';
+            }
+        }
+
+        return rtrim($cat, ',');
     }
 }
