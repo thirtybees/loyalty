@@ -694,7 +694,12 @@ class Loyalty extends Module
         $details = LoyaltyModule::getAllByIdCustomer((int) $params['id_customer'], (int) $params['cookie']->id_lang);
         foreach ($details as $key => &$loyalty) {
             $loyalty['url'] = 'index.php?tab=AdminOrders&id_order='.$loyalty['id'].'&vieworder&token='.Tools::getAdminToken('AdminOrders'.(int) Tab::getIdFromClassName('AdminOrders').(int) $params['cookie']->id_employee);
-            $loyalty['currency'] = (Currency::getCurrencyInstance($loyalty['id_currency']))->iso_code;
+            $currency = Currency::getCurrencyInstance($loyalty['id_currency']);
+            if (!Validate::isLoadedObject($currency)) {
+                Currency::getDefaultCurrency();
+            }
+
+            $loyalty['currency'] = $currency->iso_code;
         }
 
         Media::addJsDef([
