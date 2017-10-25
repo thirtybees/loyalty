@@ -291,7 +291,7 @@ class LoyaltyModule extends \ObjectModel
         }
 
         $query = '
-		SELECT f.id_order AS id, f.date_add AS date, (o.total_paid - o.total_shipping) total_without_shipping, f.points, f.id_loyalty, f.id_loyalty_state, fsl.name state
+		SELECT f.id_order AS id, f.date_add AS date, (o.total_paid - o.total_shipping) total_without_shipping, f.points, f.id_loyalty, f.id_loyalty_state, fsl.name state, o.`id_currency`
 		FROM `'._DB_PREFIX_.'loyalty` f
 		LEFT JOIN `'._DB_PREFIX_.'orders` o ON (f.id_order = o.id_order)
 		LEFT JOIN `'._DB_PREFIX_.'loyalty_state_lang` fsl ON (f.id_loyalty_state = fsl.id_loyalty_state AND fsl.id_lang = '.(int) ($idLang).')

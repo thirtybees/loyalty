@@ -30,9 +30,9 @@
           <tbody>
             {foreach $details as $key => $loyalty}
               <tr data-id-loyalty="{$loyalty['id']|intval}" data-id-loyalty-state="{$loyalty['id_loyalty_state']|intval}" class="{if $key % 2 != 0}odd{/if}">
-                <td>{if $loyalty['id'] > 0}<a style="color: #268CCD; font-weight: bold; text-decoration: underline;" href="{$loyalty['url']|escape:'htmlall':'UTF-8'}">{l s='#%d' sprintf=[$loyalty['id']]}</a>{else}--{/if}</td>
+                <td>{if $loyalty['id'] > 0}<a href="{$loyalty['url']|escape:'htmlall':'UTF-8'}">{l s='#%d' sprintf=[$loyalty['id']]}</a>{else}--{/if}</td>
                 <td>{$loyalty['date']|date_format:'d-m-Y H:i'}</td>
-                <td>{if $loyalty['id'] > 0}{$loyalty['total_without_shipping']}{else}--{/if}</td>
+                <td>{if $loyalty['id'] > 0}{displayPrice price=$loyalty['total_without_shipping'] currency=$loyalty['currency']}{else}--{/if}</td>
                 <td>{$loyalty['points']|intval}</td>
                 <td id="voucher_state_{$loyalty['id']|intval}">{$loyalty['state']|escape:'htmlall':'UTF-8'}</td>
                 <td></td>
