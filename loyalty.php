@@ -690,52 +690,19 @@ class Loyalty extends Module
             die($this->l('Incorrect Customer object.'));
         }
 
-        $details = LoyaltyModule::getAllByIdCustomer((int) $params['id_customer'], (int) $params['cookie']->id_lang);
         $points = (int) LoyaltyModule::getPointsByCustomer((int) $params['id_customer']);
-
-        $html = '<div class="col-lg-12"><div class="panel">
-            <div class="panel-heading">'.sprintf($this->l('Loyalty points (%d points)'), $points).'</div>';
-
-        if (!isset($points) || count($details) == 0) {
-            return $html.' '.$this->l('This customer has no points').'</div></div>';
+        $details = LoyaltyModule::getAllByIdCustomer((int) $params['id_customer'], (int) $params['cookie']->id_lang);
+        foreach ($details as $key => &$loyalty) {
+            $loyalty['url'] = 'index.php?tab=AdminOrders&id_order='.$loyalty['id'].'&vieworder&token='.Tools::getAdminToken('AdminOrders'.(int) Tab::getIdFromClassName('AdminOrders').(int) $params['cookie']->id_employee);
         }
 
-        $html .= '
-        <div class="panel-body">
-        <table cellspacing="0" cellpadding="0" class="table">
-            <tr style="background-color:#F5E9CF; padding: 0.3em 0.1em;">
-                <th>'.$this->l('Order').'</th>
-                <th>'.$this->l('Date').'</th>
-                <th>'.$this->l('Total (without shipping)').'</th>
-                <th>'.$this->l('Points').'</th>
-                <th>'.$this->l('Points Status').'</th>
-            </tr>';
-        foreach ($details as $key => $loyalty) {
-            $url = 'index.php?tab=AdminOrders&id_order='.$loyalty['id'].'&vieworder&token='.Tools::getAdminToken('AdminOrders'.(int) Tab::getIdFromClassName('AdminOrders').(int) $params['cookie']->id_employee);
-            $html .= '
-            <tr style="background-color: '.($key % 2 != 0 ? '#FFF6CF' : '#FFFFFF').';">
-                <td>'.((int) $loyalty['id'] > 0 ? '<a style="color: #268CCD; font-weight: bold; text-decoration: underline;" href="'.$url.'">'.sprintf($this->l('#%d'), $loyalty['id']).'</a>' : '--').'</td>
-                <td>'.Tools::displayDate($loyalty['date']).'</td>
-                <td>'.((int) $loyalty['id'] > 0 ? $loyalty['total_without_shipping'] : '--').'</td>
-                <td>'.(int) $loyalty['points'].'</td>
-                <td>'.$loyalty['state'].'</td>
-            </tr>';
-        }
-        $html .= '
-            <tr>
-                <td>&nbsp;</td>
-                <td colspan="2" class="bold" style="text-align: right;">'.$this->l('Total points available:').'</td>
-                <td>'.$points.'</td>
-                <td>'.$this->l('Voucher value:').' '.Tools::displayPrice(
-                LoyaltyModule::getVoucherValue((int) $points, (int) Configuration::get('PS_CURRENCY_DEFAULT')),
-                new Currency((int) Configuration::get('PS_CURRENCY_DEFAULT'))
-            ).'</td>
-            </tr>
-        </table>
-        </div>
-        </div></div>';
+        $this->context->smarty->assign([
+            'details'       => $details,
+            'points'        => $points,
+            'voucher_value' => LoyaltyModule::getVoucherValue((int) $points, (int) Configuration::get('PS_CURRENCY_DEFAULT')),
+        ]);
 
-        return $html;
+        return $this->display(__FILE__, 'views/templates/admin/admincustomers.tpl');
     }
 
     /**
