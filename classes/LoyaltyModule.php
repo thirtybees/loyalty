@@ -138,13 +138,14 @@ class LoyaltyModule extends \ObjectModel
                 $total += ($taxesEnabled == PS_TAX_EXC ? $product['price'] : $product['price_wt']) * (int) ($product['cart_quantity']);
             }
             foreach ($cart->getCartRules(false) as $cartRule) {
-                if ($taxesEnabled == PS_TAX_EXC) {
-                    $total -= $cartRule['value_tax_exc'];
-                } else {
-                    $total -= $cartRule['value_real'];
+                if (!$cartRule['free_shipping']) {
+                    if ($taxesEnabled == PS_TAX_EXC) {
+                        $total -= $cartRule['value_tax_exc'];
+                    } else {
+                        $total -= $cartRule['value_real'];
+                    }
                 }
             }
-
         }
 
         return self::getNbPointsByPrice($total);
