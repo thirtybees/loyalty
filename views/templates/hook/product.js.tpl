@@ -34,19 +34,17 @@
     window.none_award = {if $none_award}true{else}false{/if};
 
     function updatePoints() {
-      if (typeof(productPrice) === 'undefined' || typeof(productPriceWithoutReduction) === 'undefined') {
+      if (typeof window.priceWithDiscountsDisplay === 'undefined'
+          || typeof window.productPriceWithoutReduction === 'undefined'
+          || typeof window.productPrice === 'undefined') {
         return;
       }
 
-      var currentPrice = productPrice;
-      if (typeof window.selectedCombination !== 'undefined' && typeof window.selectedCombination.price !== 'undefined') {
-        currentPrice += window.selectedCombination.price;
-      }
-
+      var currentPrice = window.priceWithDiscountsDisplay;
       var points = parseInt(currentPrice / window.point_rate, 10);
-      var total_points = points_in_cart + points;
-      var voucher = total_points * point_value;
-      if (!none_award && parseFloat(productPriceWithoutReduction) !== parseFloat(productPrice)) {
+      var total_points = window.points_in_cart + points;
+      var voucher = total_points * window.point_value;
+      if (!window.none_award && parseFloat(productPriceWithoutReduction) !== parseFloat(productPrice)) {
         $('#loyalty').html("{l s='No reward points for this product because there\'s already a discount.' mod='loyalty'}");
       } else if (!points) {
         $('#loyalty').html("{l s='No reward points for this product.' mod='loyalty'}");
