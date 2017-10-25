@@ -33,45 +33,55 @@
     window.points_in_cart = {$points_in_cart|intval};
     window.none_award = {if $none_award}true{else}false{/if};
 
+    function updatePoints() {
+      if (typeof(productPrice) === 'undefined' || typeof(productPriceWithoutReduction) === 'undefined') {
+        return;
+      }
+
+      var currentPrice = productPrice;
+      if (typeof window.selectedCombination !== 'undefined' && typeof window.selectedCombination.price !== 'undefined') {
+        currentPrice += window.selectedCombination.price;
+      }
+
+      var points = parseInt(currentPrice / window.point_rate, 10);
+      var total_points = points_in_cart + points;
+      var voucher = total_points * point_value;
+      if (!none_award && parseFloat(productPriceWithoutReduction) !== parseFloat(productPrice)) {
+        $('#loyalty').html("{l s='No reward points for this product because there\'s already a discount.' mod='loyalty'}");
+      } else if (!points) {
+        $('#loyalty').html("{l s='No reward points for this product.' mod='loyalty'}");
+      } else {
+        var content = "{l s='By buying this product you can collect up to' mod='loyalty'} <b><span id=\"loyalty_points\">" + points + '</span> ';
+        if (points > 1) {
+          content += "{l s='loyalty points' mod='loyalty'}</b>. ";
+        } else {
+          content += "{l s='loyalty point' mod='loyalty'}</b>. ";
+        }
+
+        content += "{l s='Your cart will total' mod='loyalty'} <b><span id=\"total_loyalty_points\">" + total_points + '</span> ';
+        if (total_points > 1) {
+          content += "{l s='points' mod='loyalty'}";
+        } else {
+          content += "{l s='point' mod='loyalty'}";
+        }
+
+        content += "</b> {l s='that can be converted into a voucher of' mod='loyalty'} ";
+        content += '<span id="loyalty_price">' + formatCurrency(voucher, currencyFormat, currencySign, currencyBlank) + '</span>.';
+        $('#loyalty').html(content);
+      }
+    }
+
     $(document).ready(function () {
       // Catch all attribute changes of the product
-      $('.product_attributes input, .product_attributes select').change(function () {
-        if (typeof(productPrice) === 'undefined' || typeof(productPriceWithoutReduction) === 'undefined') {
-          return;
-        }
-
-        var points = {$points|intval};
-        var total_points = points_in_cart + points;
-        var voucher = total_points * point_value;
-        if (!none_award && parseFloat(productPriceWithoutReduction) !== parseFloat(productPrice)) {
-          $('#loyalty').html("{l s='No reward points for this product because there\'s already a discount.' mod='loyalty'}");
-        } else if (!points) {
-          $('#loyalty').html("{l s='No reward points for this product.' mod='loyalty'}");
-        } else {
-          var content = "{l s='By buying this product you can collect up to' mod='loyalty'} <b><span id=\"loyalty_points\">" + points + '</span> ';
-          if (points > 1) {
-            content += "{l s='loyalty points' mod='loyalty'}</b>. ";
-          } else {
-            content += "{l s='loyalty point' mod='loyalty'}</b>. ";
-          }
-
-          content += "{l s='Your cart will total' mod='loyalty'} <b><span id=\"total_loyalty_points\">" + total_points + '</span> ';
-          if (total_points > 1) {
-            content += "{l s='points' mod='loyalty'}";
-          } else {
-            content += "{l s='point' mod='loyalty'}";
-          }
-
-          content += "</b> {l s='that can be converted into a voucher of' mod='loyalty'} ";
-          content += '<span id="loyalty_price">' + formatCurrency(voucher, currencyFormat, currencySign, currencyBlank) + '</span>.';
-          $('#loyalty').html(content);
-        }
+      $(document).on('change', '.product_attributes input, .product_attributes select', function () {
+        setTimeout(updatePoints, 100); // Schedule last
       });
 
       // Force color "button" to fire event change
       $('#color_to_pick_list').click(function () {
-        $('#color_pick_hidden').trigger('change');
+        setTimeout(updatePoints, 100); // Schedule last
       });
+      updatePoints();
     });
   }());
 </script>
