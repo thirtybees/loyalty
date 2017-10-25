@@ -57,7 +57,7 @@ class Loyalty extends Module
     {
         $this->name = 'loyalty';
         $this->tab = 'pricing_promotion';
-        $this->version = '2.0.3';
+        $this->version = '3.0.0';
         $this->author = 'thirty bees';
         $this->need_instance = 0;
 
