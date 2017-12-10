@@ -1,0 +1,1 @@
+The thirty bees loyalty module helps you reward loyal customers by offering a loyalty points program. You can reward repeat customers with discounts in the future. 

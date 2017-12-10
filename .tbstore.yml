@@ -1,0 +1,13 @@
+module_name: Loyalty Module
+compatible_versions: 1.0.0+
+author: thirty bees
+category: front office
+tags:
+  - loyalty
+  - loyalty points
+  - customer retention
+description_short: The thirty bees loyalty module rewards loyal customers.
+description: description.md
+images:
+  - image-1.png
+license: AFL
