@@ -86,7 +86,7 @@ class Loyalty extends Module
             || !$this->registerHook('adminCustomers')
             || !$this->registerHook('shoppingCart')
             || !$this->registerHook('orderReturn')
-            || !$this->registerHook('cancelProduct')
+            || !$this->registerHook('actionProductCancel')
             || !$this->registerHook('customerAccount')
             || !Configuration::updateValue('PS_LOYALTY_POINT_VALUE', '0.20')
             || !Configuration::updateValue('PS_LOYALTY_MINIMAL', 0)
@@ -721,7 +721,7 @@ class Loyalty extends Module
      *
      * @return void
      */
-    public function hookCancelProduct($params)
+    public function hookActionProductCancel($params)
     {
         if (!Validate::isLoadedObject($params['order'])
             || !Validate::isLoadedObject($orderDetail = new OrderDetail((int) $params['id_order_detail']))
