@@ -270,29 +270,26 @@ class LoyaltyModule extends ObjectModel
 
     /**
      * @param int $idCustomer
-     * @param bool $last
      *
-     * @return array
+     * @return int[]
      *
      * @throws PrestaShopException
      */
-    public static function getDiscountByIdCustomer($idCustomer, $last = false)
+    public static function getDiscountByIdCustomer($idCustomer)
     {
         $query = '
-		SELECT f.id_cart_rule AS id_cart_rule, f.date_upd AS date_add
+		SELECT DISTINCT f.id_cart_rule
 		FROM `'._DB_PREFIX_.'loyalty` f
 		LEFT JOIN `'._DB_PREFIX_.'orders` o ON (f.`id_order` = o.`id_order`)
 		INNER JOIN `'._DB_PREFIX_.'cart_rule` cr ON (cr.`id_cart_rule` = f.`id_cart_rule`)
 		WHERE f.`id_customer` = '.(int) ($idCustomer).'
 		AND f.`id_cart_rule` > 0
-		AND o.`valid` = 1
-		GROUP BY f.id_cart_rule';
-        if ($last) {
-            $query .= ' ORDER BY f.id_loyalty DESC LIMIT 0,1';
-        }
+		AND o.`valid` = 1';
 
         $result = Db::getInstance()->executeS($query);
-        return is_array($result) ? $result : [];
+        return is_array($result)
+            ? array_column($result , 'id_cart_rule')
+            : [];
     }
 
     /**
@@ -398,7 +395,7 @@ class LoyaltyModule extends ObjectModel
     /**
      * @param int $idCartRule
      *
-     * @return array|false
+     * @return array
      *
      * @throws PrestaShopException
      */
@@ -423,6 +420,6 @@ class LoyaltyModule extends ObjectModel
             return $items;
         }
 
-        return false;
+        return [];
     }
 }

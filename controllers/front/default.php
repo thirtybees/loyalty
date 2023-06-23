@@ -247,13 +247,14 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
         );
 
         /* Discounts */
-        $nbDiscounts = 0;
         $discounts = [];
-        if ($idsDiscount = LoyaltyModule::getDiscountByIdCustomer((int) $this->context->customer->id)) {
-            $nbDiscounts = count($idsDiscount);
-            foreach ($idsDiscount as $key => $discount) {
-                $discounts[$key] = new CartRule((int) $discount['id_cart_rule'], (int) $this->context->cookie->id_lang);
-                $discounts[$key]->orders = LoyaltyModule::getOrdersByIdDiscount((int) $discount['id_cart_rule']);
+        foreach (LoyaltyModule::getDiscountByIdCustomer((int) $this->context->customer->id) as $cartRuleId) {
+            $cartRule = new CartRule((int)$cartRuleId, (int) $this->context->cookie->id_lang);
+            if (Validate::isLoadedObject($cartRule)) {
+                /** @var stdClass $discount */
+                $discount = json_decode(json_encode($cartRule));
+                $discount->orders = LoyaltyModule::getOrdersByIdDiscount($cartRule->id);
+                $discounts[] = $discount;
             }
         }
 
@@ -277,7 +278,7 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
         }
         $this->context->smarty->assign(
             [
-                'nbDiscounts'    => (int) $nbDiscounts,
+                'nbDiscounts'    => count($discounts),
                 'discounts'      => $discounts,
                 'minimalLoyalty' => (float) Configuration::get('PS_LOYALTY_MINIMAL'),
                 'categories'     => $categoriesNames,
