@@ -37,6 +37,9 @@ require_once __DIR__.'/vendor/autoload.php';
  */
 class Loyalty extends Module
 {
+    /**
+     * @var string
+     */
     protected $html = '';
 
     /** @var LoyaltyStateModule $loyaltyStateDefault */
@@ -52,6 +55,8 @@ class Loyalty extends Module
 
     /**
      * Loyalty constructor.
+     *
+     * @throws PrestaShopException
      */
     public function __construct()
     {
@@ -75,6 +80,8 @@ class Loyalty extends Module
      * Install this module
      *
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function install()
     {
@@ -131,6 +138,8 @@ class Loyalty extends Module
      * Install DB stuff
      *
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function installDB()
     {
@@ -194,6 +203,8 @@ class Loyalty extends Module
      * Uninstall this module
      *
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function uninstall()
     {
@@ -209,6 +220,8 @@ class Loyalty extends Module
 
     /**
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function uninstallDB()
     {
@@ -224,6 +237,9 @@ class Loyalty extends Module
      * Module configuration page
      *
      * @return string
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function getContent()
     {
@@ -239,6 +255,9 @@ class Loyalty extends Module
      * Hook display on product detail
      *
      * @return string
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function renderForm()
     {
@@ -455,6 +474,7 @@ class Loyalty extends Module
      * Hook display on customer account page
      *
      * @return array
+     * @throws PrestaShopException
      */
     public function getConfigFieldsValues()
     {
@@ -487,6 +507,9 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return bool|string
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookExtraRight($params)
     {
@@ -535,6 +558,8 @@ class Loyalty extends Module
      * Catch product returns and substract loyalty points
      *
      * @return string
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookDisplayMyAccountBlock()
     {
@@ -545,6 +570,8 @@ class Loyalty extends Module
      * Hook display on shopping cart summary
      *
      * @return string
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookCustomerAccount()
     {
@@ -555,6 +582,8 @@ class Loyalty extends Module
      * Hook called when a new order is created
      *
      * @param array $params
+     *
+     * @throws PrestaShopException
      */
     public function hookOrderReturn($params)
     {
@@ -593,6 +622,9 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return string
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookShoppingCart($params)
     {
@@ -618,6 +650,8 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function hookNewOrder($params)
     {
@@ -641,6 +675,8 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public function hookUpdateOrderStatus($params)
     {
@@ -682,6 +718,9 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return string
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookAdminCustomers($params)
     {
@@ -720,6 +759,8 @@ class Loyalty extends Module
      * @param array $params
      *
      * @return void
+     *
+     * @throws PrestaShopException
      */
     public function hookActionProductCancel($params)
     {
@@ -764,6 +805,8 @@ class Loyalty extends Module
 
     /**
      * Change state via ajax
+     *
+     * @throws PrestaShopException
      */
     public function ajaxProcessChangeState()
     {
@@ -784,6 +827,8 @@ class Loyalty extends Module
 
     /**
      * @return void
+     *
+     * @throws PrestaShopException
      */
     protected function instanceDefaultStates()
     {
@@ -797,6 +842,7 @@ class Loyalty extends Module
 
     /**
      * @return void
+     * @throws PrestaShopException
      */
     protected function postProcess()
     {

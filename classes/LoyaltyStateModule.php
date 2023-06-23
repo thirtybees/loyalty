@@ -25,8 +25,12 @@
 
 namespace LoyaltyModule;
 
+use Configuration;
+use Language;
 use Loyalty;
 use Module;
+use ObjectModel;
+use PrestaShopException;
 
 if (!defined('_TB_VERSION_')) {
     exit;
@@ -39,9 +43,8 @@ require_once __DIR__.'/../loyalty.php';
  *
  * @package LoyaltyModule
  */
-class LoyaltyStateModule extends \ObjectModel
+class LoyaltyStateModule extends ObjectModel
 {
-    // @codingStandardsIgnoreStart
     /**
      * @see ObjectModel::$definition
      */
@@ -56,21 +59,30 @@ class LoyaltyStateModule extends \ObjectModel
             'name'           => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'required' => true, 'size' => 128],
         ],
     ];
+
+    /**
+     * @var string
+     */
     public $name;
+
+    /**
+     * @var int
+     */
     public $id_order_state;
-    // @codingStandardsIgnoreEnd
 
     /**
      * @return bool
+     *
+     * @throws PrestaShopException
      */
     public static function insertDefaultData()
     {
-        $loyaltyModule = new \Loyalty();
-        $languages = \Language::getLanguages();
+        $loyaltyModule = new Loyalty();
+        $languages = Language::getLanguages();
 
         $defaultTranslations = ['default' => ['id_loyalty_state' => (int) LoyaltyStateModule::getDefaultId(), 'default' => $loyaltyModule->getL('Awaiting validation'), 'en' => 'Awaiting validation', 'fr' => 'En attente de validation']];
-        $defaultTranslations['validated'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getValidationId(), 'id_order_state' => \Configuration::get('PS_OS_DELIVERED'), 'default' => $loyaltyModule->getL('Available'), 'en' => 'Available', 'fr' => 'Disponible'];
-        $defaultTranslations['cancelled'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getCancelId(), 'id_order_state' => \Configuration::get('PS_OS_CANCELED'), 'default' => $loyaltyModule->getL('Cancelled'), 'en' => 'Cancelled', 'fr' => 'Annulés'];
+        $defaultTranslations['validated'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getValidationId(), 'id_order_state' => Configuration::get('PS_OS_DELIVERED'), 'default' => $loyaltyModule->getL('Available'), 'en' => 'Available', 'fr' => 'Disponible'];
+        $defaultTranslations['cancelled'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getCancelId(), 'id_order_state' => Configuration::get('PS_OS_CANCELED'), 'default' => $loyaltyModule->getL('Cancelled'), 'en' => 'Cancelled', 'fr' => 'Annulés'];
         $defaultTranslations['converted'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getConvertId(), 'default' => $loyaltyModule->getL('Already converted'), 'en' => 'Already converted', 'fr' => 'Déjà convertis'];
         $defaultTranslations['none_award'] = ['id_loyalty_state' => (int) LoyaltyStateModule::getNoneAwardId(), 'default' => $loyaltyModule->getL('Unavailable on discounts'), 'en' => 'Unavailable on discounts', 'fr' => 'Non disponbile sur produits remisés'];
 
@@ -79,7 +91,7 @@ class LoyaltyStateModule extends \ObjectModel
             if (isset($loyaltyState['id_order_state'])) {
                 $state->id_order_state = (int) $loyaltyState['id_order_state'];
             }
-            $state->name[(int) \Configuration::get('PS_LANG_DEFAULT')] = $loyaltyState['default'];
+            $state->name[(int) Configuration::get('PS_LANG_DEFAULT')] = $loyaltyState['default'];
             foreach ($languages as $language) {
                 if (isset($loyaltyState[$language['iso_code']])) {
                     $state->name[(int) $language['id_lang']] = $loyaltyState[$language['iso_code']];
@@ -136,6 +148,7 @@ class LoyaltyStateModule extends \ObjectModel
      *
      * @return array
      *
+     * @throws PrestaShopException
      * @since 3.0.0
      */
     public static function getStates()

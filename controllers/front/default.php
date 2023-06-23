@@ -30,13 +30,21 @@ use LoyaltyModule\LoyaltyStateModule;
  */
 class LoyaltyDefaultModuleFrontController extends ModuleFrontController
 {
-    // @codingStandardsIgnoreStart
+    /**
+     * @var bool
+     */
     public $ssl = true;
+
+    /**
+     * @var bool
+     */
     public $display_column_left = false;
-    // @codingStandardsIgnoreEnd
 
     /**
      * LoyaltyDefaultModuleFrontController constructor.
+     *
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function __construct()
     {
@@ -52,11 +60,12 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
     /**
      * Render pagination link for summary
      *
-     * @param (array) $params Array with to parameters p (for page number) and n (for nb of items per page)
-     *
+     * @param array $params Array with to parameters p (for page number) and n (for nb of items per page)
+     * @param Smarty_Internal_Template $smarty
      * @return string link
+     * @throws PrestaShopException
      */
-    public static function getSummaryPaginationLink($params, &$smarty)
+    public static function getSummaryPaginationLink($params, $smarty)
     {
         if (!isset($params['p'])) {
             $p = 1;
@@ -82,6 +91,8 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
     }
 
     /**
+     * @throws PrestaShopException
+     *
      * @see FrontController::postProcess()
      */
     public function postProcess()
@@ -93,6 +104,8 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
 
     /**
      * Transform loyalty point to a voucher
+     *
+     * @throws PrestaShopException
      */
     public function processTransformPoints()
     {
@@ -191,6 +204,8 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
 
     /**
      * @see FrontController::initContent()
+     *
+     * @throws PrestaShopException
      */
     public function initContent()
     {
@@ -204,6 +219,8 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
 
     /**
      * Assign summary template
+     *
+     * @throws PrestaShopException
      */
     public function assignSummaryExecution()
     {
