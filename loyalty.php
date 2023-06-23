@@ -688,7 +688,7 @@ class Loyalty extends Module
         }
         $newOrder = $params['newOrderStatus'];
         $order = new Order((int) $params['id_order']);
-        if ($order && !Validate::isLoadedObject($order)) {
+        if (!Validate::isLoadedObject($order)) {
             die($this->l('Incorrect Order object.'));
         }
         $this->instanceDefaultStates();
@@ -706,7 +706,7 @@ class Loyalty extends Module
                 if ((int) $loyalty->points < 0) {
                     $loyalty->points = abs((int) $loyalty->points);
                 }
-            } elseif ($newOrder->id == $this->loyaltyStateCancel->id_order_state) {
+            } else {
                 $loyalty->id_loyalty_state = LoyaltyStateModule::getCancelId();
                 $loyalty->points = 0;
             }
@@ -728,13 +728,13 @@ class Loyalty extends Module
     public function hookAdminCustomers($params)
     {
         $customer = new Customer((int) $params['id_customer']);
-        if ($customer && !Validate::isLoadedObject($customer)) {
+        if (!Validate::isLoadedObject($customer)) {
             die($this->l('Incorrect Customer object.'));
         }
 
         $points = (int) LoyaltyModule::getPointsByCustomer((int) $params['id_customer']);
         $details = LoyaltyModule::getAllByIdCustomer((int) $params['id_customer'], (int) $params['cookie']->id_lang);
-        foreach ($details as $key => &$loyalty) {
+        foreach ($details as &$loyalty) {
             $loyalty['url'] = 'index.php?tab=AdminOrders&id_order='.$loyalty['id'].'&vieworder&token='.Tools::getAdminToken('AdminOrders'.(int) Tab::getIdFromClassName('AdminOrders').(int) $params['cookie']->id_employee);
             $currency = Currency::getCurrencyInstance($loyalty['id_currency']);
             if (!Validate::isLoadedObject($currency)) {
