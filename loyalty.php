@@ -30,7 +30,8 @@ if (!defined('_TB_VERSION_')) {
     exit;
 }
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__. '/classes/LoyaltyModule.php';
+require_once __DIR__. '/classes/LoyaltyStateModule.php';
 
 /**
  * Class Loyalty
