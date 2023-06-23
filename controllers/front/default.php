@@ -114,7 +114,6 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
         $customerPoints = (int) LoyaltyModule::getPointsByCustomer((int) $this->context->customer->id);
         if ($customerPoints > 0) {
             /* Generate a voucher code */
-            $voucherCode = null;
             do {
                 $voucherCode = 'FID'.rand(1000, 100000);
             } while (CartRule::cartRuleExists($voucherCode));
@@ -151,7 +150,7 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
             $cartRule->active = 1;
 
             $categories = Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY');
-            if ($categories != '' && $categories != 0) {
+            if ($categories != 0) {
                 $categories = explode(',', Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
             } else {
                 die (Tools::displayError());
@@ -265,17 +264,17 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
 
         $allCategories = Category::getSimpleCategories((int) $this->context->cookie->id_lang);
         $voucherCategories = Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY');
-        if ($voucherCategories != '' && $voucherCategories != 0) {
+        if ($voucherCategories) {
             $voucherCategories = explode(',', Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
         } else {
-            die(Tools::displayError());
+            throw new PrestaShopException("Voucher categories not set");
         }
 
         if (count($voucherCategories) == count($allCategories)) {
             $categoriesNames = null;
         } else {
             $categoriesNames = [];
-            foreach ($allCategories as $k => $allCategory) {
+            foreach ($allCategories as $allCategory) {
                 if (in_array($allCategory['id_category'], $voucherCategories)) {
                     $categoriesNames[$allCategory['id_category']] = trim($allCategory['name']);
                 }

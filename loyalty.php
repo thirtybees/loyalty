@@ -450,6 +450,9 @@ class Loyalty extends Module
             ],
         ];
 
+        /** @var AdminController $controller */
+        $controller = $this->context->controller;
+
         $helper = new HelperForm();
         $helper->module = $this;
         $helper->show_toolbar = false;
@@ -463,7 +466,7 @@ class Loyalty extends Module
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->tpl_vars = [
             'fields_value' => $this->getConfigFieldsValues(),
-            'languages'    => $this->context->controller->getLanguages(),
+            'languages'    => $controller->getLanguages(),
             'id_language'  => $this->context->language->id,
         ];
 
@@ -853,10 +856,13 @@ class Loyalty extends Module
             $idLangDefault = (int) Configuration::get('PS_LANG_DEFAULT');
             $languages = Language::getLanguages();
 
+            /** @var AdminController $controller */
+            $controller = $this->context->controller;
+
             if (!is_array(Tools::getValue('categoryBox')) || !count(Tools::getValue('categoryBox'))) {
-                $this->context->controller->errors[] = $this->l('You must choose at least one category for voucher\'s action');
+                $controller->errors[] = $this->l('You must choose at least one category for voucher\'s action');
             }
-            if (!count($this->context->controller->errors)) {
+            if (!count($controller->errors)) {
                 Configuration::updateValue('PS_LOYALTY_VOUCHER_CATEGORY', $this->voucherCategories(Tools::getValue('categoryBox')));
                 Configuration::updateValue('PS_LOYALTY_POINT_VALUE', (float) (Tools::getValue('point_value')));
                 Configuration::updateValue('PS_LOYALTY_POINT_RATE', (float) (Tools::getValue('point_rate')));
@@ -907,7 +913,7 @@ class Loyalty extends Module
                 }
                 $this->loyaltyStateNoneAward->save();
 
-                $this->context->controller->confirmations[] = $this->l('Settings updated.');
+                $controller->confirmations[] = $this->l('Settings updated.');
             }
         }
     }
