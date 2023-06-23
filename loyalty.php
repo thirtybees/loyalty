@@ -662,7 +662,7 @@ class Loyalty extends Module
     public function hookNewOrder($params)
     {
         if (!Validate::isLoadedObject($params['customer']) || !Validate::isLoadedObject($params['order'])) {
-            die($this->l('Missing parameters'));
+            return false;
         }
         $loyalty = new LoyaltyModule();
         $loyalty->id_customer = (int) $params['customer']->id;
@@ -687,12 +687,12 @@ class Loyalty extends Module
     public function hookUpdateOrderStatus($params)
     {
         if (!Validate::isLoadedObject($params['newOrderStatus'])) {
-            die($this->l('Missing parameters'));
+            return false;
         }
         $newOrder = $params['newOrderStatus'];
         $order = new Order((int) $params['id_order']);
         if (!Validate::isLoadedObject($order)) {
-            die($this->l('Incorrect Order object.'));
+            return false;
         }
         $this->instanceDefaultStates();
 
@@ -732,7 +732,7 @@ class Loyalty extends Module
     {
         $customer = new Customer((int) $params['id_customer']);
         if (!Validate::isLoadedObject($customer)) {
-            die($this->l('Incorrect Customer object.'));
+            return '';
         }
 
         $points = (int) LoyaltyModule::getPointsByCustomer((int) $params['id_customer']);

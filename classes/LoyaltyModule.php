@@ -305,7 +305,7 @@ class LoyaltyModule extends ObjectModel
     public static function registerDiscount($cartRule)
     {
         if (!Validate::isLoadedObject($cartRule)) {
-            die(Tools::displayError('Incorrect object CartRule.'));
+            return false;
         }
         $context = Context::getContext();
         $items = static::getAllByIdCustomer((int) $cartRule->id_customer, (int)$context->language->id , true);

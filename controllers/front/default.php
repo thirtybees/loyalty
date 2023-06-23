@@ -149,12 +149,7 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
             $cartRule->minimum_amount_currency = (int) $this->context->currency->id;
             $cartRule->active = 1;
 
-            $categories = Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY');
-            if ($categories != 0) {
-                $categories = explode(',', Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
-            } else {
-                die (Tools::displayError());
-            }
+            $categories = explode(',', (string)Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
 
             $languages = Language::getLanguages(true);
             $defaultText = Configuration::get('PS_LOYALTY_VOUCHER_DETAILS', (int) Configuration::get('PS_LANG_DEFAULT'));
@@ -263,12 +258,7 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
         }
 
         $allCategories = Category::getSimpleCategories((int) $this->context->cookie->id_lang);
-        $voucherCategories = Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY');
-        if ($voucherCategories) {
-            $voucherCategories = explode(',', Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
-        } else {
-            throw new PrestaShopException("Voucher categories not set");
-        }
+        $voucherCategories = explode(',', (string)Configuration::get('PS_LOYALTY_VOUCHER_CATEGORY'));
 
         if (count($voucherCategories) == count($allCategories)) {
             $categoriesNames = null;
