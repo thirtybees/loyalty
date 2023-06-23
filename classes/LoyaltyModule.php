@@ -35,7 +35,6 @@ use Db;
 use Language;
 use ObjectModel;
 use Order;
-use PDOStatement;
 use PrestaShopException;
 use Product;
 use Shop;
@@ -106,40 +105,34 @@ class LoyaltyModule extends ObjectModel
     /**
      * @param int $idOrder
      *
-     * @return bool
+     * @return int
      *
      * @throws PrestaShopException
      */
     public static function getByOrderId($idOrder)
     {
-        if (!Validate::isUnsignedId($idOrder)) {
-            return false;
-        }
-
-        $result = Db::getInstance()->getRow(
+        return (int) Db::getInstance()->getValue(
             '
 		SELECT f.id_loyalty
 		FROM `'._DB_PREFIX_.'loyalty` f
 		WHERE f.id_order = '.(int) ($idOrder)
         );
-
-        return isset($result['id_loyalty']) ? $result['id_loyalty'] : false;
     }
 
     /**
      * @param Order $order
      *
-     * @return bool|int
+     * @return int
      *
      * @throws PrestaShopException
      */
     public static function getOrderNbPoints($order)
     {
         if (!Validate::isLoadedObject($order)) {
-            return false;
+            return 0;
         }
 
-        return self::getCartNbPoints(new Cart((int) $order->id_cart));
+        return static::getCartNbPoints(new Cart((int) $order->id_cart));
     }
 
     /**
@@ -197,7 +190,7 @@ class LoyaltyModule extends ObjectModel
             }
         }
 
-        return self::getNbPointsByPrice($total);
+        return static::getNbPointsByPrice($total);
     }
 
     /**
@@ -234,13 +227,13 @@ class LoyaltyModule extends ObjectModel
     {
         $currency = $idCurrency ? new Currency($idCurrency) : Context::getContext()->currency->id;
 
-        return (int) $nbPoints * (float) Tools::convertPrice(Configuration::get('PS_LOYALTY_POINT_VALUE'), $currency);
+        return (int)$nbPoints * (float)Tools::convertPrice(Configuration::get('PS_LOYALTY_POINT_VALUE'), $currency);
     }
 
     /**
      * @param int $idCustomer
      *
-     * @return false|null|string
+     * @return int
      *
      * @throws PrestaShopException
      */
@@ -253,8 +246,9 @@ class LoyaltyModule extends ObjectModel
             $sqlPeriod = ' AND datediff(NOW(),f.date_add) <= '.$validityPeriod;
         }
 
-        return
-            Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+        $conn = Db::getInstance(_PS_USE_SQL_SLAVE_);
+
+        return (int)$conn->getValue(
                 '
 		SELECT SUM(f.points) points
 		FROM `'._DB_PREFIX_.'loyalty` f
@@ -263,7 +257,7 @@ class LoyaltyModule extends ObjectModel
 		'.$sqlPeriod
             )
             +
-            Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            (int)$conn->getValue(
                 '
 		SELECT SUM(f.points) points
 		FROM `'._DB_PREFIX_.'loyalty` f
@@ -278,7 +272,7 @@ class LoyaltyModule extends ObjectModel
      * @param int $idCustomer
      * @param bool $last
      *
-     * @return mixed
+     * @return array
      *
      * @throws PrestaShopException
      */
@@ -297,13 +291,14 @@ class LoyaltyModule extends ObjectModel
             $query .= ' ORDER BY f.id_loyalty DESC LIMIT 0,1';
         }
 
-        return Db::getInstance()->executeS($query);
+        $result = Db::getInstance()->executeS($query);
+        return is_array($result) ? $result : [];
     }
 
     /**
      * @param CartRule $cartRule
      *
-     * @return bool|void
+     * @return bool
      *
      * @throws PrestaShopException
      */
@@ -312,7 +307,8 @@ class LoyaltyModule extends ObjectModel
         if (!Validate::isLoadedObject($cartRule)) {
             die(Tools::displayError('Incorrect object CartRule.'));
         }
-        $items = self::getAllByIdCustomer((int) $cartRule->id_customer, null, true);
+        $context = Context::getContext();
+        $items = static::getAllByIdCustomer((int) $cartRule->id_customer, (int)$context->language->id , true);
         $associated = false;
         foreach ($items AS $item) {
             $lm = new LoyaltyModule((int) $item['id_loyalty']);
@@ -341,7 +337,7 @@ class LoyaltyModule extends ObjectModel
      * @param int $nb
      * @param int $page
      *
-     * @return mixed
+     * @return array
      *
      * @throws PrestaShopException
      */
@@ -365,7 +361,8 @@ class LoyaltyModule extends ObjectModel
         }
         $query .= ' GROUP BY f.id_loyalty '.($pagination ? 'LIMIT '.(((int) ($page) - 1) * (int) ($nb)).', '.(int) ($nb) : '');
 
-        return Db::getInstance()->executeS($query);
+        $result = Db::getInstance()->executeS($query);
+        return is_array($result) ? $result : [];
     }
 
     /**
@@ -401,7 +398,7 @@ class LoyaltyModule extends ObjectModel
     /**
      * @param int $idCartRule
      *
-     * @return array|bool|false|null|PDOStatement
+     * @return array|false
      *
      * @throws PrestaShopException
      */

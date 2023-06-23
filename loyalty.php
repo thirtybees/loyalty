@@ -474,6 +474,7 @@ class Loyalty extends Module
      * Hook display on customer account page
      *
      * @return array
+     *
      * @throws PrestaShopException
      */
     public function getConfigFieldsValues()
@@ -506,7 +507,7 @@ class Loyalty extends Module
     /**
      * @param array $params
      *
-     * @return bool|string
+     * @return string
      *
      * @throws PrestaShopException
      * @throws SmartyException
@@ -551,13 +552,14 @@ class Loyalty extends Module
             return $this->display(__FILE__, 'product.tpl').$this->display(__FILE__, 'product.js.tpl');
         }
 
-        return false;
+        return '';
     }
 
     /**
      * Catch product returns and substract loyalty points
      *
      * @return string
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */
@@ -570,6 +572,7 @@ class Loyalty extends Module
      * Hook display on shopping cart summary
      *
      * @return string
+     *
      * @throws PrestaShopException
      * @throws SmartyException
      */

@@ -62,7 +62,9 @@ class LoyaltyDefaultModuleFrontController extends ModuleFrontController
      *
      * @param array $params Array with to parameters p (for page number) and n (for nb of items per page)
      * @param Smarty_Internal_Template $smarty
+     *
      * @return string link
+     *
      * @throws PrestaShopException
      */
     public static function getSummaryPaginationLink($params, $smarty)
